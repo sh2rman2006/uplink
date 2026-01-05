@@ -1,3 +1,75 @@
+server:
+  port: ${SERVER_PORT:8080}
+
 spring:
   application:
     name: core-service
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 300MB
+      max-request-size: 300MB
+
+  # ===== PostgreSQL =====
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://uplink-postgres:5432/uplink}
+    username: ${DB_USERNAME:uplink}
+    password: ${DB_PASSWORD:uplink}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:1}
+      connection-timeout: ${DB_POOL_CONN_TIMEOUT_MS:30000}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  # ===== Liquibase =====
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  # ===== Kafka =====
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:uplink-kafka:9092}
+    client-id: ${KAFKA_CLIENT_ID:${spring.application.name}}
+    consumer:
+      group-id: ${UPLINK_KAFKA_CONSUMER_GROUP:${spring.application.name}}
+      enable-auto-commit: true
+      auto-offset-reset: latest
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      max.poll.records: 200
+
+  # ===== Redis =====
+  data:
+    redis:
+      host: ${REDIS_HOST:uplink-redis}
+      port: ${REDIS_PORT:6379}
+      timeout: ${REDIS_TIMEOUT:2s}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
+
+  # ===== Security =====
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
+# ===== Uplink domain config =====
+uplink:
+  kafka:
+    topics:
+      keycloak-user-events: ${UPLINK_KAFKA_TOPIC_KEYCLOAK_USER_EVENTS:uplink.user-events}
+
+# ===== MinIO =====
+minio:
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket: ${MINIO_BUCKET:uplink-dev}
