@@ -1,12 +1,12 @@
-package tech.sh2rman.coreservice.service.impl;
+package tech.sh2rman.coreservice.domain.user.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 import tech.sh2rman.coreservice.domain.user.repository.UserProfileRepository;
+import tech.sh2rman.coreservice.domain.user.service.UserProfileService;
 import tech.sh2rman.coreservice.integration.keycloak.KeycloakUserEvent;
-import tech.sh2rman.coreservice.service.UserProfileService;
 
 import java.util.UUID;
 

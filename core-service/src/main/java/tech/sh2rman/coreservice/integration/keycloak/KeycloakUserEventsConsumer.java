@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import tech.sh2rman.coreservice.service.UserProfileService;
+import tech.sh2rman.coreservice.domain.user.service.UserProfileService;
 
 @Slf4j
 @Component

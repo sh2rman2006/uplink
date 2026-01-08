@@ -1,0 +1,36 @@
+package tech.sh2rman.coreservice.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import tech.sh2rman.coreservice.domain.chat.dto.CreateChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.CreateChatResponse;
+import tech.sh2rman.coreservice.domain.chat.service.ChatService;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/v1/chat")
+@RequiredArgsConstructor
+@Tag(name = "Chat", description = "API чатов")
+public class ChatController {
+    private final ChatService chatService;
+
+    @Operation(summary = "Создать чат")
+    @PostMapping("/create")
+    public CreateChatResponse createChat(
+            @Valid @RequestBody CreateChatRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID chatId = chatService.createChat(userId, req).getId();
+        return new CreateChatResponse(chatId);
+    }
+}

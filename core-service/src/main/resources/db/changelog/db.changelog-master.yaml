@@ -20,3 +20,58 @@ databaseChangeLog:
             splitStatements: true
             stripComments: true
             endDelimiter: ;
+
+  - changeSet:
+      id: 0003-create-enums
+      author: uplink
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/0003-create-enums.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+            endDelimiter: ;
+
+  - changeSet:
+      id: 0004-create-chats
+      author: uplink
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/0004-create-chats.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+            endDelimiter: ;
+
+  - changeSet:
+      id: 0005-create-chat-participants
+      author: uplink
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/0005-create-chat-participants.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+            endDelimiter: ;
+
+  - changeSet:
+      id: 0006-create-messages
+      author: uplink
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/0006-create-messages.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+            endDelimiter: ;
+
+  - changeSet:
+      id: 0007-create-attachments
+      author: uplink
+      changes:
+        - sqlFile:
+            path: db/changelog/changes/0007-create-attachments.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+            endDelimiter: ;

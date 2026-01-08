@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.service;
+package tech.sh2rman.coreservice.domain.user.service;
 
 import tech.sh2rman.coreservice.integration.keycloak.KeycloakUserEvent;
 
