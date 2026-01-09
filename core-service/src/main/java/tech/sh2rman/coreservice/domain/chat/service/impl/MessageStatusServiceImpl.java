@@ -25,6 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MessageStatusServiceImpl implements MessageStatusService {
+
     private final MessageRepository messageRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final MessageAccessService access;
@@ -42,10 +43,16 @@ public class MessageStatusServiceImpl implements MessageStatusService {
             throw new MessageBadRequestException("message is deleted");
         }
 
+        if (message.getSender() != null
+                && message.getSender().getId() != null
+                && message.getSender().getId().equals(userId)) {
+            return;
+        }
+
         OffsetDateTime now = OffsetDateTime.now();
         Chat chat = message.getChat();
 
-        if (chat.getType() == ChatType.PRIVATE) {
+        if (chat != null && chat.getType() == ChatType.PRIVATE) {
             MessageStatus st = message.getStatus();
             if (st == null || st == MessageStatus.SENT) {
                 message.setStatus(MessageStatus.DELIVERED);
@@ -54,10 +61,8 @@ public class MessageStatusServiceImpl implements MessageStatusService {
             }
         }
 
-        messagingTemplate.convertAndSend(
-                "/topic/chat." + chatId,
-                WsEvent.of(
-                        WsEventType.MESSAGE_DELIVERED,
+        messagingTemplate.convertAndSend("/topic/chat." + chatId,
+                WsEvent.of(WsEventType.MESSAGE_DELIVERED,
                         new MessageDeliveredPayload(chatId, messageId, userId, now)
                 )
         );
@@ -70,6 +75,11 @@ public class MessageStatusServiceImpl implements MessageStatusService {
         ChatParticipant me = access.requireParticipant(chatId, userId);
         access.assertCanRead(me);
 
+        UUID currentLastId = me.getLastReadMessageId();
+        if (currentLastId != null && currentLastId.equals(upToMessageId)) {
+            return;
+        }
+
         Message upTo = access.requireMessage(chatId, upToMessageId);
         if (upTo.getDeletedAt() != null) {
             throw new MessageBadRequestException("message is deleted");
@@ -78,12 +88,13 @@ public class MessageStatusServiceImpl implements MessageStatusService {
         OffsetDateTime now = OffsetDateTime.now();
         Chat chat = upTo.getChat();
 
-        UUID currentLastId = me.getLastReadMessageId();
-        if (currentLastId != null && !currentLastId.equals(upToMessageId)) {
+        if (currentLastId != null) {
             Message currentLast = messageRepository.findByIdAndChatId(currentLastId, chatId).orElse(null);
-            if (currentLast != null) {
-                // если новое upTo НЕ позже текущего — ничего не делаем
-                if (!upTo.getCreatedAt().isAfter(currentLast.getCreatedAt())) {
+            if (currentLast != null && currentLast.getCreatedAt() != null && upTo.getCreatedAt() != null) {
+                OffsetDateTime cur = currentLast.getCreatedAt();
+                OffsetDateTime nxt = upTo.getCreatedAt();
+
+                if (nxt.isBefore(cur)) {
                     return;
                 }
             }
@@ -94,21 +105,23 @@ public class MessageStatusServiceImpl implements MessageStatusService {
         me.setUpdatedAt(now);
         chatParticipantRepository.save(me);
 
-        if (chat.getType() == ChatType.PRIVATE) {
-            if (upTo.getStatus() != MessageStatus.READ) {
-                upTo.setStatus(MessageStatus.READ);
-                upTo.setUpdatedAt(now);
-                messageRepository.save(upTo);
+        if (chat != null && chat.getType() == ChatType.PRIVATE) {
+            if (upTo.getSender() != null
+                    && upTo.getSender().getId() != null
+                    && !upTo.getSender().getId().equals(userId)) {
+
+                if (upTo.getStatus() != MessageStatus.READ) {
+                    upTo.setStatus(MessageStatus.READ);
+                    upTo.setUpdatedAt(now);
+                    messageRepository.save(upTo);
+                }
             }
         }
 
-        messagingTemplate.convertAndSend(
-                "/topic/chat." + chatId,
-                WsEvent.of(
-                        WsEventType.MESSAGE_READ,
+        messagingTemplate.convertAndSend("/topic/chat." + chatId,
+                WsEvent.of(WsEventType.MESSAGE_READ,
                         new MessageReadUpToPayload(chatId, userId, upToMessageId, now)
                 )
         );
     }
-
 }
