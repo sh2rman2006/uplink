@@ -1,5 +1,6 @@
 package tech.sh2rman.coreservice.domain.chat.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
@@ -18,6 +19,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             OffsetDateTime before
     );
 
+    @EntityGraph(attributePaths = "chat")
     Optional<Message> findByIdAndChatId(UUID id, UUID chatId);
 
     Optional<Message> findFirstByChatIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID chatId);
