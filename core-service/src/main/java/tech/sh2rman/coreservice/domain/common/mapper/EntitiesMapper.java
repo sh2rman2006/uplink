@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.domain.chat.mapper;
+package tech.sh2rman.coreservice.domain.common.mapper;
 
 
 import jakarta.validation.constraints.NotNull;

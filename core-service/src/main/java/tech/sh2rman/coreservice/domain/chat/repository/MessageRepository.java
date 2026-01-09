@@ -6,6 +6,7 @@ import tech.sh2rman.coreservice.domain.chat.entity.Message;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,4 +17,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             UUID chatId,
             OffsetDateTime before
     );
+
+    Optional<Message> findByIdAndChatId(UUID id, UUID chatId);
+
+    Optional<Message> findFirstByChatIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID chatId);
 }

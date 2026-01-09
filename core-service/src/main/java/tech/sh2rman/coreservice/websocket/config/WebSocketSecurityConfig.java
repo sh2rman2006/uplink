@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.websocket;
+package tech.sh2rman.coreservice.websocket.config;
 
 //@Configuration
 //@EnableWebSocketSecurity

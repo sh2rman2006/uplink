@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.websocket;
+package tech.sh2rman.coreservice.websocket.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

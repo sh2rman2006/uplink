@@ -4,27 +4,33 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import tech.sh2rman.coreservice.domain.chat.dto.MessageDto;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
+import tech.sh2rman.coreservice.domain.common.mapper.EntitiesMapper;
+
+import java.util.List;
 
 @Component
 public class MessageMapper implements EntitiesMapper<Message, MessageDto> {
 
     @Override
-    public MessageDto toDto(@NotNull Message message) {
+    public MessageDto toDto(@NotNull Message m) {
         MessageDto dto = new MessageDto();
 
-        dto.setId(message.getId());
-        dto.setChatId(message.getChat().getId());
-        dto.setSenderId(message.getSender().getId());
-        dto.setType(message.getType().name());
+        dto.setId(m.getId());
+        dto.setChatId(m.getChat().getId());
+        dto.setSenderId(m.getSender().getId());
 
-        dto.setText(message.getText());
+        dto.setType(m.getType());
+        dto.setText(m.getText());
 
-        if (message.getReplyToMessage() != null) {
-            dto.setReplyToMessageId(message.getReplyToMessage().getId());
-        }
+        dto.setReplyToMessageId(m.getReplyToMessage() != null ? m.getReplyToMessage().getId() : null);
 
-        dto.setCreatedAt(message.getCreatedAt());
+        dto.setCreatedAt(m.getCreatedAt());
 
+        dto.setUpdatedAt(m.getUpdatedAt());
+        dto.setEditCount(m.getEditCount());
+        dto.setLastEditedAt(m.getLastEditedAt());
+
+        dto.setAttachments(List.of());
         return dto;
     }
 

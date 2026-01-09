@@ -2,6 +2,7 @@ package tech.sh2rman.coreservice.domain.chat.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import tech.sh2rman.coreservice.domain.chat.model.MessageType;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -16,16 +17,19 @@ public class MessageDto {
     private UUID chatId;
     private UUID senderId;
 
-    private String type; // MessageType.name()
+    private MessageType type;
 
     private String text;
 
     private UUID replyToMessageId;
 
-    private List<AttachmentDto> attachments = new ArrayList<>();
-
     private OffsetDateTime createdAt;
 
+    private OffsetDateTime updatedAt;
+    private Integer editCount;
+    private OffsetDateTime lastEditedAt;
+
+    private List<AttachmentDto> attachments = new ArrayList<>();
 
     @Getter
     @Setter
