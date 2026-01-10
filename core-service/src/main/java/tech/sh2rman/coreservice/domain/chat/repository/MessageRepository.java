@@ -32,11 +32,30 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         where m.chat.id = :chatId
           and m.deletedAt is null
           and m.sender.id <> :userId
-          and (:lastReadAt is null or m.createdAt > :lastReadAt)
     """)
-    long countUnread(
+    long countUnreadAll(
+            @Param("chatId") UUID chatId,
+            @Param("userId") UUID userId
+    );
+
+    @Query("""
+        select count(m)
+        from Message m
+        where m.chat.id = :chatId
+          and m.deletedAt is null
+          and m.sender.id <> :userId
+          and m.createdAt > :lastReadAt
+    """)
+    long countUnreadAfter(
             @Param("chatId") UUID chatId,
             @Param("userId") UUID userId,
             @Param("lastReadAt") OffsetDateTime lastReadAt
     );
+
+    default long countUnread(UUID chatId, UUID userId, OffsetDateTime lastReadAt) {
+        if (lastReadAt == null) {
+            return countUnreadAll(chatId, userId);
+        }
+        return countUnreadAfter(chatId, userId, lastReadAt);
+    }
 }

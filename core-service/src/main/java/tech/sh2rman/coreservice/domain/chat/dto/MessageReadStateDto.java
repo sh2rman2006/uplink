@@ -10,7 +10,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MessageReadStateDto {
     private UUID chatId;
-    private UUID userId;
 
     private UUID lastReadMessageId;
     private OffsetDateTime lastReadAt;

@@ -28,7 +28,6 @@ public class MessageReadStateServiceImpl implements MessageReadStateService {
 
         return new MessageReadStateDto(
                 chatId,
-                userId,
                 me.getLastReadMessageId(),
                 me.getLastReadAt(),
                 unread
