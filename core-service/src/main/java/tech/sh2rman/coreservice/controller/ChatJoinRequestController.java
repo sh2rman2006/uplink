@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import tech.sh2rman.coreservice.domain.chat.dto.ChatJoinRequestResponse;
 import tech.sh2rman.coreservice.domain.chat.dto.InviteToChatRequest;
+import tech.sh2rman.coreservice.domain.chat.mapper.ChatJoinRequestMapper;
 import tech.sh2rman.coreservice.domain.chat.service.ChatJoinRequestService;
 
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class ChatJoinRequestController {
 
     private final ChatJoinRequestService chatJoinRequestService;
+    private final ChatJoinRequestMapper mapper;
 
     @Operation(summary = "Пригласить пользователя в чат")
     @PostMapping("/{chatId}/join-requests/invite")
@@ -31,7 +33,7 @@ public class ChatJoinRequestController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID actorId = UUID.fromString(jwt.getSubject());
-        return chatJoinRequestService.invite(chatId, actorId, req);
+        return mapper.toDto(chatJoinRequestService.invite(chatId, actorId, req));
     }
 
     @Operation(summary = "Мои входящие приглашения (inbox)")
@@ -42,7 +44,7 @@ public class ChatJoinRequestController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return chatJoinRequestService.inbox(userId, status, pageable);
+        return chatJoinRequestService.inbox(userId, status, pageable).map(mapper::toDto);
     }
 
     @Operation(summary = "Список приглашений по чату (для админов/владельца)")
@@ -54,7 +56,7 @@ public class ChatJoinRequestController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID actorId = UUID.fromString(jwt.getSubject());
-        return chatJoinRequestService.listByChat(chatId, actorId, status, pageable);
+        return chatJoinRequestService.listByChat(chatId, actorId, status, pageable).map(mapper::toDto);
     }
 
     @Operation(summary = "Принять приглашение")
@@ -64,7 +66,7 @@ public class ChatJoinRequestController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return chatJoinRequestService.accept(requestId, userId);
+        return mapper.toDto(chatJoinRequestService.accept(requestId, userId));
     }
 
     @Operation(summary = "Отклонить приглашение")
@@ -74,6 +76,6 @@ public class ChatJoinRequestController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return chatJoinRequestService.reject(requestId, userId);
+        return mapper.toDto(chatJoinRequestService.reject(requestId, userId));
     }
 }

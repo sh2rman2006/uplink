@@ -2,12 +2,12 @@ package tech.sh2rman.coreservice.domain.chat.service;
 
 import tech.sh2rman.coreservice.domain.chat.dto.CreateTextMessageRequest;
 import tech.sh2rman.coreservice.domain.chat.dto.EditTextMessageRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.MessageDto;
+import tech.sh2rman.coreservice.domain.chat.entity.Message;
 
 import java.util.UUID;
 
 public interface TextMessageService {
-    MessageDto sendText(UUID chatId, UUID userId, CreateTextMessageRequest req);
+    Message sendText(UUID chatId, UUID userId, CreateTextMessageRequest req);
 
-    MessageDto editText(UUID chatId, UUID userId, UUID messageId, EditTextMessageRequest req);
+    Message editText(UUID chatId, UUID userId, UUID messageId, EditTextMessageRequest req);
 }

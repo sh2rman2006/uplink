@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.sh2rman.coreservice.domain.chat.dto.CreateTextMessageRequest;
 import tech.sh2rman.coreservice.domain.chat.dto.EditTextMessageRequest;
 import tech.sh2rman.coreservice.domain.chat.dto.MessageDto;
+import tech.sh2rman.coreservice.domain.chat.mapper.MessageMapper;
 import tech.sh2rman.coreservice.domain.chat.service.MessageDeleteService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageQueryService;
 import tech.sh2rman.coreservice.domain.chat.service.TextMessageService;
@@ -27,6 +28,7 @@ public class MessageController {
     private final TextMessageService textMessageService;
     private final MessageQueryService messageQueryService;
     private final MessageDeleteService messageDeleteService;
+    private final MessageMapper messageMapper;
 
     @Operation(summary = "Отправить текстовое сообщение")
     @PostMapping("/{chatId}/message/text")
@@ -36,7 +38,7 @@ public class MessageController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return textMessageService.sendText(chatId, userId, req);
+        return messageMapper.toDto(textMessageService.sendText(chatId, userId, req));
     }
 
     @Operation(summary = "Получить сообщения чата (последние 50; пагинация по before)")
@@ -59,7 +61,7 @@ public class MessageController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return textMessageService.editText(chatId, userId, messageId, req);
+        return messageMapper.toDto(textMessageService.editText(chatId, userId, messageId, req));
     }
 
     @Operation(summary = "Удалить сообщение (у всех)")

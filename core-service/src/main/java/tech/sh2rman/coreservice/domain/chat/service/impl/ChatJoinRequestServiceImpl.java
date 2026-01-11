@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatJoinRequestResponse;
 import tech.sh2rman.coreservice.domain.chat.dto.InviteToChatRequest;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatJoinRequest;
@@ -40,7 +39,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
 
     @Override
     @Transactional
-    public ChatJoinRequestResponse invite(UUID chatId, UUID actorUserId, InviteToChatRequest req) {
+    public ChatJoinRequest invite(UUID chatId, UUID actorUserId, InviteToChatRequest req) {
 
         if (req == null || req.userId() == null) {
             throw new ChatBadRequestException("userId is required");
@@ -60,7 +59,9 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
 
         UUID targetUserId = req.userId();
 
-        Optional<ChatParticipant> existingParticipant = chatParticipantRepository.findByChatIdAndUserId(chatId, targetUserId);
+        Optional<ChatParticipant> existingParticipant =
+                chatParticipantRepository.findByChatIdAndUserId(chatId, targetUserId);
+
         if (existingParticipant.isPresent() && existingParticipant.get().getStatus() == ParticipantStatus.ACTIVE) {
             throw new ChatBadRequestException("User already in chat");
         }
@@ -83,7 +84,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         String currentStatus = normalizeStatus(jr.getStatus());
         if (STATUS_PENDING.equals(currentStatus)) {
             jr.setMessage(req.message());
-            return toResponse(chatJoinRequestRepository.save(jr));
+            return chatJoinRequestRepository.save(jr);
         }
 
         if (STATUS_APPROVED.equals(currentStatus)) {
@@ -95,36 +96,33 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         jr.setReviewedBy(null);
         jr.setReviewedAt(null);
 
-        ChatJoinRequest saved = chatJoinRequestRepository.save(jr);
-        return toResponse(saved);
+        return chatJoinRequestRepository.save(jr);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChatJoinRequestResponse> inbox(UUID userId, String status, Pageable pageable) {
+    public Page<ChatJoinRequest> inbox(UUID userId, String status, Pageable pageable) {
         String st = normalizeStatus(status);
         if (st == null) st = STATUS_PENDING;
 
-        return chatJoinRequestRepository.findByUser_IdAndStatusOrderByCreatedAtDesc(userId, st, pageable)
-                .map(this::toResponse);
+        return chatJoinRequestRepository.findByUser_IdAndStatusOrderByCreatedAtDesc(userId, st, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChatJoinRequestResponse> listByChat(UUID chatId, UUID actorUserId, String status, Pageable pageable) {
+    public Page<ChatJoinRequest> listByChat(UUID chatId, UUID actorUserId, String status, Pageable pageable) {
         ChatParticipant me = access.requireParticipant(chatId, actorUserId);
         assertCanManageInvites(me);
 
         String st = normalizeStatus(status);
         if (st == null) st = STATUS_PENDING;
 
-        return chatJoinRequestRepository.findByChat_IdAndStatusOrderByCreatedAtDesc(chatId, st, pageable)
-                .map(this::toResponse);
+        return chatJoinRequestRepository.findByChat_IdAndStatusOrderByCreatedAtDesc(chatId, st, pageable);
     }
 
     @Override
     @Transactional
-    public ChatJoinRequestResponse accept(UUID requestId, UUID userId) {
+    public ChatJoinRequest accept(UUID requestId, UUID userId) {
         ChatJoinRequest jr = chatJoinRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ChatBadRequestException("Join request not found"));
 
@@ -145,7 +143,8 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         ChatParticipant meInChat = null;
         try {
             meInChat = access.requireParticipant(chat.getId(), userId);
-        } catch (ChatParticipantNotFoundException ignored) {}
+        } catch (ChatParticipantNotFoundException ignored) {
+        }
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -188,13 +187,12 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         jr.setReviewedBy(reviewer);
         jr.setReviewedAt(now);
 
-        ChatJoinRequest saved = chatJoinRequestRepository.save(jr);
-        return toResponse(saved);
+        return chatJoinRequestRepository.save(jr);
     }
 
     @Override
     @Transactional
-    public ChatJoinRequestResponse reject(UUID requestId, UUID userId) {
+    public ChatJoinRequest reject(UUID requestId, UUID userId) {
         ChatJoinRequest jr = chatJoinRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ChatBadRequestException("Join request not found"));
 
@@ -214,8 +212,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         jr.setReviewedBy(reviewer);
         jr.setReviewedAt(now);
 
-        ChatJoinRequest saved = chatJoinRequestRepository.save(jr);
-        return toResponse(saved);
+        return chatJoinRequestRepository.save(jr);
     }
 
     private void assertCanInvite(Chat chat, ChatParticipant me) {
@@ -248,27 +245,6 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
     private String normalizeStatus(String s) {
         if (s == null) return null;
         String t = s.trim().toUpperCase();
-        return t.isEmpty() ? null : t;
-    }
-
-    private ChatJoinRequestResponse toResponse(ChatJoinRequest jr) {
-        ChatJoinRequestResponse r = new ChatJoinRequestResponse();
-        r.setId(jr.getId());
-        r.setStatus(jr.getStatus());
-        r.setMessage(trimOrNull(jr.getMessage()));
-
-        if (jr.getChat() != null) r.setChatId(jr.getChat().getId());
-        if (jr.getUser() != null) r.setUserId(jr.getUser().getId());
-
-        if (jr.getReviewedBy() != null) r.setReviewedById(jr.getReviewedBy().getId());
-        r.setReviewedAt(jr.getReviewedAt());
-        r.setCreatedAt(jr.getCreatedAt());
-        return r;
-    }
-
-    private String trimOrNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
         return t.isEmpty() ? null : t;
     }
 }

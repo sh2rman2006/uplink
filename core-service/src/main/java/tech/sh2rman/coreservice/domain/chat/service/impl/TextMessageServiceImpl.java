@@ -37,7 +37,7 @@ public class TextMessageServiceImpl implements TextMessageService {
 
     @Override
     @Transactional
-    public MessageDto sendText(UUID chatId, UUID userId, CreateTextMessageRequest req) {
+    public Message sendText(UUID chatId, UUID userId, CreateTextMessageRequest req) {
 
         if (req == null || req.text() == null || req.text().isBlank()) {
             throw new MessageBadRequestException("text is required");
@@ -79,12 +79,12 @@ public class TextMessageServiceImpl implements TextMessageService {
                 WsEvent.of(WsEventType.MESSAGE_CREATED, dto)
         );
 
-        return dto;
+        return saved;
     }
 
     @Override
     @Transactional
-    public MessageDto editText(UUID chatId, UUID userId, UUID messageId, EditTextMessageRequest req) {
+    public Message editText(UUID chatId, UUID userId, UUID messageId, EditTextMessageRequest req) {
 
         if (req == null || req.text() == null || req.text().isBlank()) {
             throw new MessageBadRequestException("text is required");
@@ -121,6 +121,7 @@ public class TextMessageServiceImpl implements TextMessageService {
             chatRepository.save(chat);
         }
 
-        return dto;
+        return saved;
     }
 }
+
