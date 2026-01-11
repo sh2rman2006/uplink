@@ -1,8 +1,11 @@
 package tech.sh2rman.coreservice.domain.chat.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.sh2rman.coreservice.domain.chat.dto.ChatParticipantResponse;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.exception.ChatBadRequestException;
@@ -250,5 +253,35 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
                 p.setStatus(ParticipantStatus.BANNED);
             }
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ChatParticipantResponse> listParticipants(UUID chatId, UUID userId, Pageable pageable) {
+        ChatParticipant me = access.requireParticipant(chatId, userId);
+        access.assertCanRead(me);
+
+        return chatParticipantRepository.findByChatId(chatId, pageable)
+                .map(this::toResponse);
+    }
+
+    private ChatParticipantResponse toResponse(ChatParticipant p) {
+        ChatParticipantResponse r = new ChatParticipantResponse();
+
+        UserProfileEntity u = p.getUser();
+        if (u != null) {
+            r.setUserId(u.getId());
+            r.setUsername(u.getUsername());
+            r.setDisplayName(u.getDisplayName());
+            r.setAvatarUrl(u.getAvatarUrl());
+            r.setAvatarVersion(u.getAvatarVersion());
+            r.setLastSeenAt(u.getLastSeenAt());
+        }
+
+        r.setRole(p.getRole());
+        r.setStatus(p.getStatus());
+        r.setJoinedAt(p.getJoinedAt());
+
+        return r;
     }
 }
