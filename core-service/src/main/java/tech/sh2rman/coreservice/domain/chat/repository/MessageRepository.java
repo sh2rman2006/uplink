@@ -1,5 +1,6 @@
 package tech.sh2rman.coreservice.domain.chat.repository;
 
+import com.opencsv.bean.CsvToBean;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,9 +9,7 @@ import org.springframework.stereotype.Repository;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, UUID> {
@@ -58,4 +57,23 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         }
         return countUnreadAfter(chatId, userId, lastReadAt);
     }
+
+    @Query(value = """
+        select m.chat_id as chatId,
+               count(*) as unread
+        from uplink.message m
+        join uplink.chat_participant cp
+          on cp.chat_id = m.chat_id
+         and cp.user_id = :userId
+        where m.chat_id in (:chatIds)
+          and m.deleted_at is null
+          and m.sender_id <> :userId
+          and m.created_at > coalesce(cp.last_read_at, to_timestamp(0))
+        group by m.chat_id
+    """, nativeQuery = true)
+    List<ChatUnreadCountProjection> countUnreadByChats(
+            @Param("userId") UUID userId,
+            @Param("chatIds") Collection<UUID> chatIds
+    );
+
 }
