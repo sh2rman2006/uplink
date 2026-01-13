@@ -116,7 +116,7 @@ public class ChatServiceImpl implements ChatService {
             }
 
             if (req.coverFile() != null && !req.coverFile().isEmpty()) {
-                minioStorageService.putChatAvatar(chatId, req.coverFile());
+                chat.setAvatarObjectKey(minioStorageService.putChatAvatar(chatId, req.coverFile()));
                 changed = true;
             }
         }
