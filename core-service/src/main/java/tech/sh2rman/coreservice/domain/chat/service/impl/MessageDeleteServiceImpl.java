@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.MessageDeletedPayload;
+import tech.sh2rman.coreservice.domain.chat.dto.req.MessageDeletedPayload;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageDeleteService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 import tech.sh2rman.coreservice.websocket.dto.WsEvent;
@@ -26,7 +26,7 @@ public class MessageDeleteServiceImpl implements MessageDeleteService {
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final MessageAccessService access;
+    private final ChatAccessService access;
 
     @Override
     @Transactional

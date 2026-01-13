@@ -12,7 +12,7 @@ import tech.sh2rman.coreservice.domain.chat.model.ChatType;
 import tech.sh2rman.coreservice.domain.chat.model.MessageStatus;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatParticipantRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageStatusService;
 import tech.sh2rman.coreservice.websocket.dto.WsEvent;
 import tech.sh2rman.coreservice.websocket.dto.WsEventType;
@@ -28,7 +28,7 @@ public class MessageStatusServiceImpl implements MessageStatusService {
 
     private final MessageRepository messageRepository;
     private final ChatParticipantRepository chatParticipantRepository;
-    private final MessageAccessService access;
+    private final ChatAccessService access;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override

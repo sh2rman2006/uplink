@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatParticipantResponse;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.exception.ChatBadRequestException;
@@ -14,8 +13,8 @@ import tech.sh2rman.coreservice.domain.chat.model.ChatRole;
 import tech.sh2rman.coreservice.domain.chat.model.ChatType;
 import tech.sh2rman.coreservice.domain.chat.model.ParticipantStatus;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatParticipantRepository;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.ChatParticipantService;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 
 import java.time.OffsetDateTime;
@@ -30,7 +29,7 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
 
     private static final Set<ParticipantStatus> ACTIVE_STATUSES = EnumSet.of(ParticipantStatus.ACTIVE, ParticipantStatus.MUTED);
 
-    private final MessageAccessService access;
+    private final ChatAccessService access;
     private final ChatParticipantRepository chatParticipantRepository;
 
     @Override
@@ -257,31 +256,10 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChatParticipantResponse> listParticipants(UUID chatId, UUID userId, Pageable pageable) {
+    public Page<ChatParticipant> listParticipants(UUID chatId, UUID userId, Pageable pageable) {
         ChatParticipant me = access.requireParticipant(chatId, userId);
         access.assertCanRead(me);
 
-        return chatParticipantRepository.findByChatId(chatId, pageable)
-                .map(this::toResponse);
-    }
-
-    private ChatParticipantResponse toResponse(ChatParticipant p) {
-        ChatParticipantResponse r = new ChatParticipantResponse();
-
-        UserProfileEntity u = p.getUser();
-        if (u != null) {
-            r.setUserId(u.getId());
-            r.setUsername(u.getUsername());
-            r.setDisplayName(u.getDisplayName());
-            r.setAvatarUrl(u.getAvatarUrl());
-            r.setAvatarVersion(u.getAvatarVersion());
-            r.setLastSeenAt(u.getLastSeenAt());
-        }
-
-        r.setRole(p.getRole());
-        r.setStatus(p.getStatus());
-        r.setJoinedAt(p.getJoinedAt());
-
-        return r;
+        return chatParticipantRepository.findByChatId(chatId, pageable);
     }
 }

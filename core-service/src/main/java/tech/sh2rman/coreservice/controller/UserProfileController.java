@@ -7,12 +7,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import tech.sh2rman.coreservice.domain.user.dto.MyProfileResponse;
 import tech.sh2rman.coreservice.domain.user.dto.UpdateMyProfileRequest;
 import tech.sh2rman.coreservice.domain.user.dto.UserProfileSearchItemResponse;
+import tech.sh2rman.coreservice.domain.user.mapper.UserProfileMapper;
+import tech.sh2rman.coreservice.domain.user.mapper.UserProfileSearchItemMapper;
 import tech.sh2rman.coreservice.domain.user.service.UserProfileService;
 
 import java.util.UUID;
@@ -24,6 +27,8 @@ import java.util.UUID;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+    private final UserProfileSearchItemMapper userProfileSearchItemMapper;
+    private final UserProfileMapper userProfileMapper;
 
     @Operation(summary = "Поиск пользователей (username/displayName)")
     @GetMapping("/search")
@@ -33,7 +38,7 @@ public class UserProfileController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID me = UUID.fromString(jwt.getSubject());
-        return userProfileService.search(q, me, pageable);
+        return userProfileService.search(q, me, pageable).map(userProfileSearchItemMapper::toDto);
     }
 
     @Operation(summary = "Мой профиль")
@@ -42,17 +47,17 @@ public class UserProfileController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID me = UUID.fromString(jwt.getSubject());
-        return userProfileService.getMe(me);
+        return userProfileMapper.toDto(userProfileService.getMe(me));
     }
 
     @Operation(summary = "Обновить мой профиль")
-    @PatchMapping("/me")
+    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MyProfileResponse updateMe(
-            @Valid @RequestBody UpdateMyProfileRequest req,
+            @Valid @ModelAttribute  UpdateMyProfileRequest req,
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID me = UUID.fromString(jwt.getSubject());
-        return userProfileService.updateMe(me, req);
+        return userProfileMapper.toDto(userProfileService.updateMe(me, req));
     }
 
 }

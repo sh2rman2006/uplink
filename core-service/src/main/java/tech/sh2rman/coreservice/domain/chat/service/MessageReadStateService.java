@@ -1,6 +1,6 @@
 package tech.sh2rman.coreservice.domain.chat.service;
 
-import tech.sh2rman.coreservice.domain.chat.dto.MessageReadStateDto;
+import tech.sh2rman.coreservice.domain.chat.dto.res.MessageReadStateDto;
 
 import java.util.UUID;
 

@@ -7,7 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.TypingService;
 import tech.sh2rman.coreservice.websocket.dto.WsEvent;
 import tech.sh2rman.coreservice.websocket.dto.WsEventType;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TypingWsController {
 
-    private final MessageAccessService access;
+    private final ChatAccessService access;
     private final TypingService typingService;
     private final SimpMessagingTemplate messagingTemplate;
 

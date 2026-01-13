@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tech.sh2rman.coreservice.domain.chat.dto.MessageReadStateDto;
+import tech.sh2rman.coreservice.domain.chat.dto.res.MessageReadStateDto;
 import tech.sh2rman.coreservice.domain.chat.service.MessageReadStateService;
 
 import java.util.UUID;

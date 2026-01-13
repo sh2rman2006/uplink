@@ -6,12 +6,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatListItemResponse;
-import tech.sh2rman.coreservice.domain.chat.dto.CreateChatRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.CreateChatResponse;
+import tech.sh2rman.coreservice.domain.chat.dto.req.CreateChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.EditChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatDto;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatListItemResponse;
+import tech.sh2rman.coreservice.domain.chat.mapper.ChatMapper;
 import tech.sh2rman.coreservice.domain.chat.service.ChatService;
 
 import java.util.UUID;
@@ -22,16 +25,25 @@ import java.util.UUID;
 @Tag(name = "Chat", description = "API чатов")
 public class ChatController {
     private final ChatService chatService;
+    private final ChatMapper chatMapper;
 
     @Operation(summary = "Создать чат")
-    @PostMapping("/create")
-    public CreateChatResponse createChat(
-            @Valid @RequestBody CreateChatRequest req,
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ChatDto createChat(
+            @Valid @ModelAttribute CreateChatRequest req,
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        UUID chatId = chatService.createChat(userId, req).getId();
-        return new CreateChatResponse(chatId);
+        return chatMapper.toDto(chatService.createChat(userId, req));
+    }
+
+    @Operation(summary = "Изменить чат")
+    @PatchMapping(value = "/{chatId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ChatDto editChat(@Valid @ModelAttribute EditChatRequest req,
+                            @AuthenticationPrincipal Jwt jwt,
+                            @PathVariable UUID chatId) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return chatMapper.toDto(chatService.editChat(userId, chatId, req));
     }
 
     @Operation(summary = "Список моих чатов (unread + lastMessage preview)")

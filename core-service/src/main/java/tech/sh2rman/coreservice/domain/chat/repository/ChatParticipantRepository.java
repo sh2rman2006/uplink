@@ -22,4 +22,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     List<ChatParticipant> findByUserIdAndChatIdIn(UUID userId, Collection<UUID> chatIds);
 
     Page<ChatParticipant> findByChatId(UUID chatId, Pageable pageable);
+
+    List<ChatParticipant> findByChatIdIn(Collection<UUID> ids);
+
 }

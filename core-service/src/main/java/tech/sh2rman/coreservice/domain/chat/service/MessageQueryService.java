@@ -1,6 +1,6 @@
 package tech.sh2rman.coreservice.domain.chat.service;
 
-import tech.sh2rman.coreservice.domain.chat.dto.MessageDto;
+import tech.sh2rman.coreservice.domain.chat.dto.res.MessageDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

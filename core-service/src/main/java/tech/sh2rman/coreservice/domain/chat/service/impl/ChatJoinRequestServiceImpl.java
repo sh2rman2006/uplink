@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.InviteToChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.InviteToChatRequest;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatJoinRequest;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
@@ -17,8 +17,8 @@ import tech.sh2rman.coreservice.domain.chat.model.ChatType;
 import tech.sh2rman.coreservice.domain.chat.model.ParticipantStatus;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatJoinRequestRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatParticipantRepository;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.ChatJoinRequestService;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 
 import java.time.OffsetDateTime;
@@ -33,7 +33,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
     private static final String STATUS_APPROVED = "APPROVED";
     private static final String STATUS_REJECTED = "REJECTED";
 
-    private final MessageAccessService access;
+    private final ChatAccessService access;
     private final ChatJoinRequestRepository chatJoinRequestRepository;
     private final ChatParticipantRepository chatParticipantRepository;
 

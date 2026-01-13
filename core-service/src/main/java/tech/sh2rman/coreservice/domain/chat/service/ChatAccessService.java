@@ -7,7 +7,7 @@ import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 
 import java.util.UUID;
 
-public interface MessageAccessService {
+public interface ChatAccessService {
     Chat requireChat(UUID chatId);
 
     ChatParticipant requireParticipant(UUID chatId, UUID userId);
@@ -23,4 +23,8 @@ public interface MessageAccessService {
     void assertCanDelete(Chat chat, ChatParticipant me, Message message, UUID userId);
 
     UserProfileEntity requireUser(UUID userId);
+
+    void assertCanChangeChatSettings(Chat chat, ChatParticipant me);
+
+    void assertCanChangeChatInfo(Chat chat, ChatParticipant me);
 }

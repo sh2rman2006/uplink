@@ -1,7 +1,7 @@
 package tech.sh2rman.coreservice.domain.chat.service;
 
-import tech.sh2rman.coreservice.domain.chat.dto.CreateTextMessageRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.EditTextMessageRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.CreateTextMessageRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.EditTextMessageRequest;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
 
 import java.util.UUID;

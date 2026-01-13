@@ -1,7 +1,8 @@
-package tech.sh2rman.coreservice.domain.chat.dto;
+package tech.sh2rman.coreservice.domain.chat.dto.req;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 import tech.sh2rman.coreservice.domain.chat.model.ChatType;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ public record CreateChatRequest(
         @NotNull ChatType type,
         @Size(max = 128) String title,
         @Size(max = 2048) String description,
-        Set<UUID> memberUserIds
+        Set<UUID> memberUserIds,
+        MultipartFile coverFile
 ) implements Serializable {
 }

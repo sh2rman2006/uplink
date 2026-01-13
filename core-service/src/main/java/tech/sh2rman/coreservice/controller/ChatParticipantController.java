@@ -9,9 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import tech.sh2rman.coreservice.domain.chat.dto.AddChatParticipantRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.ChangeChatParticipantRoleRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatParticipantResponse;
+import tech.sh2rman.coreservice.domain.chat.dto.req.AddChatParticipantRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.ChangeChatParticipantRoleRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatParticipantResponse;
+import tech.sh2rman.coreservice.domain.chat.mapper.ChatParticipantMapper;
 import tech.sh2rman.coreservice.domain.chat.service.ChatParticipantService;
 
 import java.util.UUID;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class ChatParticipantController {
 
     private final ChatParticipantService chatParticipantService;
+    private final ChatParticipantMapper chatParticipantMapper;
 
     @PostMapping("/{chatId}/participants")
     public void add(
@@ -72,6 +74,6 @@ public class ChatParticipantController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return chatParticipantService.listParticipants(chatId, userId, pageable);
+        return chatParticipantService.listParticipants(chatId, userId, pageable).map(chatParticipantMapper::toDto);
     }
 }

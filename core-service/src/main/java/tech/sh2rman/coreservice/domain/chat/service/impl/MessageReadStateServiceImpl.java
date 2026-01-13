@@ -3,10 +3,10 @@ package tech.sh2rman.coreservice.domain.chat.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.MessageReadStateDto;
+import tech.sh2rman.coreservice.domain.chat.dto.res.MessageReadStateDto;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageReadStateService;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MessageReadStateServiceImpl implements MessageReadStateService {
 
-    private final MessageAccessService access;
+    private final ChatAccessService access;
     private final MessageRepository messageRepository;
 
     @Override

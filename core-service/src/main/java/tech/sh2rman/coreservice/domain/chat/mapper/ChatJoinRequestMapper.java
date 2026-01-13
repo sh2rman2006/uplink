@@ -2,7 +2,7 @@ package tech.sh2rman.coreservice.domain.chat.mapper;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatJoinRequestResponse;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatJoinRequestResponse;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatJoinRequest;
 import tech.sh2rman.coreservice.domain.common.mapper.EntitiesMapper;
 

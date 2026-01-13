@@ -6,8 +6,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatListItemResponse;
-import tech.sh2rman.coreservice.domain.chat.dto.CreateChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.CreateChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.EditChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatListItemResponse;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
@@ -19,9 +20,11 @@ import tech.sh2rman.coreservice.domain.chat.repository.ChatParticipantRepository
 import tech.sh2rman.coreservice.domain.chat.repository.ChatRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatUnreadCountProjection;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.ChatService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 import tech.sh2rman.coreservice.domain.user.repository.UserProfileRepository;
+import tech.sh2rman.coreservice.integration.minio.MinioStorageService;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -36,6 +39,8 @@ public class ChatServiceImpl implements ChatService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final UserProfileRepository userProfileRepository;
     private final MessageRepository messageRepository;
+    private final MinioStorageService minioStorageService;
+    private final ChatAccessService access;
 
     @Override
     @Transactional
@@ -44,11 +49,18 @@ public class ChatServiceImpl implements ChatService {
             throw new ChatBadRequestException("type is required");
         }
 
-        return switch (req.type()) {
+        Chat createdChat = switch (req.type()) {
             case PRIVATE -> createPrivateChat(creatorUserId, req);
             case GROUP -> createGroupChat(creatorUserId, req);
             case CHANNEL, SECRET -> throw new ChatBadRequestException(req.type() + " not supported yet");
         };
+
+        if (req.coverFile() != null && !createdChat.getType().equals(ChatType.PRIVATE)) {
+            String objectKey = minioStorageService.putChatAvatar(createdChat.getId(), req.coverFile());
+            createdChat.setAvatarObjectKey(objectKey);
+            return chatRepository.save(createdChat);
+        }
+        return createdChat;
     }
 
     @Override
@@ -70,6 +82,85 @@ public class ChatServiceImpl implements ChatService {
         return enrichChatList(page, userId);
     }
 
+    @Override
+    @Transactional
+    public Chat editChat(UUID userId, UUID chatId, EditChatRequest req) {
+        if (req == null) throw new ChatBadRequestException("Request is required");
+
+        Chat chat = access.requireChat(chatId);
+        ChatParticipant me = access.requireParticipant(chatId, userId);
+
+        if (chat.getType() == ChatType.PRIVATE) {
+            throw new ChatBadRequestException("PRIVATE chat cannot be edited");
+        }
+
+        boolean changed = false;
+        OffsetDateTime now = OffsetDateTime.now();
+
+        boolean wantsInfoChange =
+                req.title() != null ||
+                        req.description() != null ||
+                        (req.coverFile() != null && !req.coverFile().isEmpty());
+
+        if (wantsInfoChange) {
+            access.assertCanChangeChatInfo(chat, me);
+
+            if (req.title() != null) {
+                chat.setTitle(normalizePatchString(req.title()));
+                changed = true;
+            }
+
+            if (req.description() != null) {
+                chat.setDescription(normalizePatchString(req.description()));
+                changed = true;
+            }
+
+            if (req.coverFile() != null && !req.coverFile().isEmpty()) {
+                minioStorageService.putChatAvatar(chatId, req.coverFile());
+                changed = true;
+            }
+        }
+
+        boolean wantsFlags =
+                req.allowSendMedia() != null ||
+                        req.allowAddUsers() != null ||
+                        req.allowPinMessages() != null ||
+                        req.allowChangeInfo() != null;
+
+        if (wantsFlags) {
+            access.assertCanChangeChatSettings(chat, me);
+
+            if (req.allowSendMedia() != null) {
+                chat.setAllowSendMedia(req.allowSendMedia());
+                changed = true;
+            }
+            if (req.allowAddUsers() != null) {
+                chat.setAllowAddUsers(req.allowAddUsers());
+                changed = true;
+            }
+            if (req.allowPinMessages() != null) {
+                chat.setAllowPinMessages(req.allowPinMessages());
+                changed = true;
+            }
+            if (req.allowChangeInfo() != null) {
+                chat.setAllowChangeInfo(req.allowChangeInfo());
+                changed = true;
+            }
+        }
+
+        if (!changed) return chat;
+
+        chat.setUpdatedAt(now);
+        return chatRepository.save(chat);
+    }
+
+    private String normalizePatchString(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+
     private Page<ChatListItemResponse> enrichChatList(Page<Chat> page, UUID userId) {
 
         List<Chat> chats = page.getContent();
@@ -78,11 +169,6 @@ public class ChatServiceImpl implements ChatService {
         }
 
         List<UUID> chatIds = chats.stream().map(Chat::getId).toList();
-
-        Map<UUID, ChatParticipant> myParticipantsByChatId = chatParticipantRepository
-                .findByUserIdAndChatIdIn(userId, chatIds)
-                .stream()
-                .collect(Collectors.toMap(p -> p.getChat().getId(), Function.identity(), (a, b) -> a));
 
         Map<UUID, Long> unreadByChatId = messageRepository.countUnreadByChats(userId, chatIds).stream()
                 .collect(Collectors.toMap(ChatUnreadCountProjection::getChatId, ChatUnreadCountProjection::getUnread, (a, b) -> a));
@@ -96,6 +182,30 @@ public class ChatServiceImpl implements ChatService {
                 ? Map.of()
                 : messageRepository.findAllById(lastMessageIds).stream()
                 .collect(Collectors.toMap(Message::getId, Function.identity(), (a, b) -> a));
+
+
+        List<UUID> privateChatIds = chats.stream()
+                .filter(c -> c.getType() == ChatType.PRIVATE)
+                .map(Chat::getId)
+                .toList();
+
+        Map<UUID, UUID> peerUserIdByChatId = privateChatIds.isEmpty()
+                ? Map.of()
+                : chatParticipantRepository.findByChatIdIn(privateChatIds).stream()
+                .filter(p -> p.getUser() != null && p.getUser().getId() != null)
+                .filter(p -> !p.getUser().getId().equals(userId)) // НЕ я
+                .collect(Collectors.toMap(
+                        p -> p.getChat().getId(),
+                        p -> p.getUser().getId(),
+                        (a, b) -> a
+                ));
+
+        Set<UUID> peerUserIds = new HashSet<>(peerUserIdByChatId.values());
+
+        Map<UUID, UserProfileEntity> peerProfileById = peerUserIds.isEmpty()
+                ? Map.of()
+                : userProfileRepository.findAllById(peerUserIds).stream()
+                .collect(Collectors.toMap(UserProfileEntity::getId, Function.identity(), (a, b) -> a));
 
         List<ChatListItemResponse> items = new ArrayList<>(chats.size());
 
@@ -127,11 +237,28 @@ public class ChatServiceImpl implements ChatService {
                 }
             }
 
+            if (chat.getType() == ChatType.PRIVATE) {
+                UUID peerId = peerUserIdByChatId.get(chat.getId());
+                UserProfileEntity peer = (peerId == null) ? null : peerProfileById.get(peerId);
+
+                if (peer != null && peer.getAvatarVersion() != null) {
+                    r.setAvatarUrl(minioStorageService.getUserAvatarObjectUrl(
+                            peer.getId(),
+                            String.valueOf(peer.getAvatarVersion())
+                    ));
+                } else {
+                    r.setAvatarUrl(null);
+                }
+            } else {
+                r.setAvatarUrl(minioStorageService.getChatAvatarObjectUrl(chat.getId()));
+            }
+
             items.add(r);
         }
 
         return new PageImpl<>(items, page.getPageable(), page.getTotalElements());
     }
+
 
     private Chat createPrivateChat(UUID creatorUserId, CreateChatRequest req) {
         Set<UUID> members = req.memberUserIds();

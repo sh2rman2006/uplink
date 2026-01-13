@@ -12,4 +12,9 @@ public class MinioProperties {
     private String accessKey;
     private String secretKey;
     private String bucket;
+
+    private int presignTtlSeconds;
+    private String avatarsPrefix;
+
+    private String chatAvatarsPrefix;
 }

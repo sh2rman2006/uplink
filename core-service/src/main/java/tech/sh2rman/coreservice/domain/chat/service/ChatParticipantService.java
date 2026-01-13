@@ -2,7 +2,7 @@ package tech.sh2rman.coreservice.domain.chat.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatParticipantResponse;
+import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.model.ChatRole;
 
 import java.util.UUID;
@@ -16,5 +16,5 @@ public interface ChatParticipantService {
 
     void changeRole(UUID chatId, UUID actorUserId, UUID targetUserId, ChatRole role);
 
-    Page<ChatParticipantResponse> listParticipants(UUID chatId, UUID userId, Pageable pageable);
+    Page<ChatParticipant> listParticipants(UUID chatId, UUID userId, Pageable pageable);
 }

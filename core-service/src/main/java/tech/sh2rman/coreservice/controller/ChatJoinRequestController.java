@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import tech.sh2rman.coreservice.domain.chat.dto.ChatJoinRequestResponse;
-import tech.sh2rman.coreservice.domain.chat.dto.InviteToChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.InviteToChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.res.ChatJoinRequestResponse;
 import tech.sh2rman.coreservice.domain.chat.mapper.ChatJoinRequestMapper;
 import tech.sh2rman.coreservice.domain.chat.service.ChatJoinRequestService;
 

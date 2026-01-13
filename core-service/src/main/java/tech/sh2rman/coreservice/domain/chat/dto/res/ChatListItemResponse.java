@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.domain.chat.dto;
+package tech.sh2rman.coreservice.domain.chat.dto.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +20,7 @@ public class ChatListItemResponse {
     private ChatType type;
     private String title;
     private String description;
+    private String avatarUrl;
 
     private OffsetDateTime updatedAt;
 

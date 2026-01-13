@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.domain.chat.dto;
+package tech.sh2rman.coreservice.domain.chat.dto.req;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

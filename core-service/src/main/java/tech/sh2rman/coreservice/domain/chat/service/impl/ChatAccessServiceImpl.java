@@ -12,7 +12,7 @@ import tech.sh2rman.coreservice.domain.chat.model.ParticipantStatus;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatParticipantRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 import tech.sh2rman.coreservice.domain.user.exception.UserProfileNotFoundException;
 import tech.sh2rman.coreservice.domain.user.repository.UserProfileRepository;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class MessageAccessServiceImpl implements MessageAccessService {
+public class ChatAccessServiceImpl implements ChatAccessService {
 
     private final ChatRepository chatRepository;
     private final ChatParticipantRepository chatParticipantRepository;
@@ -46,6 +46,41 @@ public class MessageAccessServiceImpl implements MessageAccessService {
         return userProfileRepository.findById(userId)
                 .orElseThrow(UserProfileNotFoundException::new);
     }
+
+    @Override
+    public void assertCanChangeChatInfo(Chat chat, ChatParticipant me) {
+        assertCanRead(me);
+
+        if (chat.getType() == ChatType.PRIVATE) {
+            throw new MessageForbiddenException("Not allowed for PRIVATE chat");
+        }
+
+        if (me.getRole() != ChatRole.OWNER && me.getRole() != ChatRole.ADMIN) {
+            throw new MessageForbiddenException("Not allowed");
+        }
+
+        if (Boolean.FALSE.equals(chat.getAllowChangeInfo())) {
+            throw new MessageForbiddenException("Chat does not allow changing info");
+        }
+
+        if (Boolean.FALSE.equals(me.getCanChangeInfo())) {
+            throw new MessageForbiddenException("Not allowed to change chat info");
+        }
+    }
+
+    @Override
+    public void assertCanChangeChatSettings(Chat chat, ChatParticipant me) {
+        assertCanRead(me);
+
+        if (chat.getType() == ChatType.PRIVATE) {
+            throw new MessageForbiddenException("Not allowed for PRIVATE chat");
+        }
+
+        if (me.getRole() != ChatRole.OWNER && me.getRole() != ChatRole.ADMIN) {
+            throw new MessageForbiddenException("Only OWNER can change chat settings");
+        }
+    }
+
 
     @Override
     public Message requireMessage(UUID chatId, UUID messageId) {

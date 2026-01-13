@@ -2,7 +2,7 @@ package tech.sh2rman.coreservice.domain.chat.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import tech.sh2rman.coreservice.domain.chat.dto.InviteToChatRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.InviteToChatRequest;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatJoinRequest;
 
 import java.util.UUID;

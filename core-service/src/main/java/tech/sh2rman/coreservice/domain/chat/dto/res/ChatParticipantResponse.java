@@ -1,4 +1,4 @@
-package tech.sh2rman.coreservice.domain.chat.dto;
+package tech.sh2rman.coreservice.domain.chat.dto.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

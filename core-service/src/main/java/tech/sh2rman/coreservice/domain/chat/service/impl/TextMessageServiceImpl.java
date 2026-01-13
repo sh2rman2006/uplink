@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.sh2rman.coreservice.domain.chat.dto.CreateTextMessageRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.EditTextMessageRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.MessageDto;
+import tech.sh2rman.coreservice.domain.chat.dto.req.CreateTextMessageRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.EditTextMessageRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.res.MessageDto;
 import tech.sh2rman.coreservice.domain.chat.entity.Chat;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
 import tech.sh2rman.coreservice.domain.chat.entity.Message;
@@ -16,7 +16,7 @@ import tech.sh2rman.coreservice.domain.chat.model.MessageStatus;
 import tech.sh2rman.coreservice.domain.chat.model.MessageType;
 import tech.sh2rman.coreservice.domain.chat.repository.ChatRepository;
 import tech.sh2rman.coreservice.domain.chat.repository.MessageRepository;
-import tech.sh2rman.coreservice.domain.chat.service.MessageAccessService;
+import tech.sh2rman.coreservice.domain.chat.service.ChatAccessService;
 import tech.sh2rman.coreservice.domain.chat.service.TextMessageService;
 import tech.sh2rman.coreservice.domain.user.entity.UserProfileEntity;
 import tech.sh2rman.coreservice.websocket.dto.WsEvent;
@@ -33,7 +33,7 @@ public class TextMessageServiceImpl implements TextMessageService {
     private final ChatRepository chatRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageMapper messageMapper;
-    private final MessageAccessService access;
+    private final ChatAccessService access;
 
     @Override
     @Transactional
