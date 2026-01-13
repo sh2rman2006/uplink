@@ -4,13 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import tech.sh2rman.coreservice.domain.chat.dto.req.CreateTextMessageRequest;
-import tech.sh2rman.coreservice.domain.chat.dto.req.EditTextMessageRequest;
+import tech.sh2rman.coreservice.domain.chat.dto.req.*;
 import tech.sh2rman.coreservice.domain.chat.dto.res.MessageDto;
 import tech.sh2rman.coreservice.domain.chat.mapper.MessageMapper;
+import tech.sh2rman.coreservice.domain.chat.service.AttachmentMessageService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageDeleteService;
 import tech.sh2rman.coreservice.domain.chat.service.MessageQueryService;
 import tech.sh2rman.coreservice.domain.chat.service.TextMessageService;
@@ -26,8 +27,11 @@ import java.util.UUID;
 public class MessageController {
 
     private final TextMessageService textMessageService;
+    private final AttachmentMessageService attachmentMessageService;
+
     private final MessageQueryService messageQueryService;
     private final MessageDeleteService messageDeleteService;
+
     private final MessageMapper messageMapper;
 
     @Operation(summary = "Отправить текстовое сообщение")
@@ -39,6 +43,48 @@ public class MessageController {
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
         return messageMapper.toDto(textMessageService.sendText(chatId, userId, req));
+    }
+
+    @Operation(summary = "Отправить медиа-сообщение (фото/видео), multipart")
+    @PostMapping(
+            value = "/{chatId}/message/media",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public MessageDto sendMedia(
+            @PathVariable UUID chatId,
+            @Valid @ModelAttribute CreateMediaMessageRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return messageMapper.toDto(attachmentMessageService.sendMedia(chatId, userId, req));
+    }
+
+    @Operation(summary = "Отправить файлы (документы/архивы/прочее + аудио), multipart")
+    @PostMapping(
+            value = "/{chatId}/message/files",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public MessageDto sendFiles(
+            @PathVariable UUID chatId,
+            @Valid @ModelAttribute CreateFilesMessageRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return messageMapper.toDto(attachmentMessageService.sendFiles(chatId, userId, req));
+    }
+
+    @Operation(summary = "Отправить голосовое сообщение, multipart")
+    @PostMapping(
+            value = "/{chatId}/message/voice",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public MessageDto sendVoice(
+            @PathVariable UUID chatId,
+            @Valid @ModelAttribute CreateVoiceMessageRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return messageMapper.toDto(attachmentMessageService.sendVoice(chatId, userId, req));
     }
 
     @Operation(summary = "Получить сообщения чата (последние 50; пагинация по before)")

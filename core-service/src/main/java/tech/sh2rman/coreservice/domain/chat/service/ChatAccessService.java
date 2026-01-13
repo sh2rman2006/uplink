@@ -27,4 +27,6 @@ public interface ChatAccessService {
     void assertCanChangeChatSettings(Chat chat, ChatParticipant me);
 
     void assertCanChangeChatInfo(Chat chat, ChatParticipant me);
+
+    void assertCanSendMedia(Chat chat, ChatParticipant me);
 }

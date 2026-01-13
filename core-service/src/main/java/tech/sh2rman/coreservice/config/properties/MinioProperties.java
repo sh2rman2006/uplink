@@ -14,7 +14,11 @@ public class MinioProperties {
     private String bucket;
 
     private int presignTtlSeconds;
-    private String avatarsPrefix;
 
+    private String avatarsPrefix;
     private String chatAvatarsPrefix;
+    private String attachmentsImagePrefix;
+    private String attachmentsFilePrefix;
+    private String attachmentsVideoPrefix;
+    private String attachmentsAudioPrefix;
 }

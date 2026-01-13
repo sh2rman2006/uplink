@@ -73,3 +73,10 @@ minio:
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket: ${MINIO_BUCKET:uplink-dev}
+  presign-ttl-seconds: 3600
+  avatars-prefix: avatars
+  chat-avatars-prefix: chat-avatars
+  attachments-image-prefix: attachments/images
+  attachments-file-prefix: attachments/files
+  attachments-audio-prefix: attachments/audio
+  attachments-video-prefix: attachments/video

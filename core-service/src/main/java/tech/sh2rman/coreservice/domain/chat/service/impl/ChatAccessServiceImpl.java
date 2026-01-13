@@ -69,6 +69,24 @@ public class ChatAccessServiceImpl implements ChatAccessService {
     }
 
     @Override
+    public void assertCanSendMedia(Chat chat, ChatParticipant me) {
+        assertCanSend(chat, me);
+
+        if (chat.getType() != ChatType.PRIVATE) {
+            if (me.getRole() == ChatRole.READER) {
+                throw new MessageForbiddenException("Read-only");
+            }
+            if (Boolean.FALSE.equals(chat.getAllowSendMedia())) {
+                throw new MessageForbiddenException("Chat does not allow sending media");
+            }
+            if (Boolean.FALSE.equals(me.getCanSendMedia())) {
+                throw new MessageForbiddenException("Not allowed to send media");
+            }
+        }
+    }
+
+
+    @Override
     public void assertCanChangeChatSettings(Chat chat, ChatParticipant me) {
         assertCanRead(me);
 
