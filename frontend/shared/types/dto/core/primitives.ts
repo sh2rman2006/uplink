@@ -1,0 +1,9 @@
+export type UUID = string;
+export type OffsetDateTime = string;
+export type Instant = string;
+export type LocalDate = string;
+export type LocalDateTime = string;
+export type LocalTime = string;
+export type Duration = string;
+export type BigDecimal = string;
+export type MultipartFile = File;

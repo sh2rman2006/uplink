@@ -52,7 +52,7 @@ public class ChatMapper implements EntitiesMapper<Chat, ChatDto> {
         if (objectKey != null) {
             dto.setAvatarUrl(storage.presignGet(objectKey));
         } else {
-            dto.setAvatarUrl(safeTrim(c.getAvatarUrl()));
+            dto.setAvatarUrl(null);
         }
 
         return dto;

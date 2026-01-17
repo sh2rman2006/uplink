@@ -2,6 +2,7 @@ package tech.sh2rman.coreservice.domain.chat.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import tech.sh2rman.coreservice.domain.chat.entity.ChatParticipant;
@@ -21,6 +22,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 
     List<ChatParticipant> findByUserIdAndChatIdIn(UUID userId, Collection<UUID> chatIds);
 
+    @EntityGraph(attributePaths = {"user"})
     Page<ChatParticipant> findByChatId(UUID chatId, Pageable pageable);
 
     List<ChatParticipant> findByChatIdIn(Collection<UUID> ids);

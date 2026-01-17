@@ -1,0 +1,35 @@
+{
+  "name": "frontend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/eslint": "^1.12.1",
+    "@nuxt/hints": "^1.0.0-alpha.5",
+    "@nuxt/image": "^2.0.0",
+    "@nuxt/ui": "^4.3.0",
+    "@primeuix/themes": "^2.0.2",
+    "@stomp/stompjs": "^7.2.1",
+    "eslint": "^9.39.2",
+    "modern-css-reset": "^1.4.0",
+    "nuxt": "^4.2.2",
+    "primeflex": "^4.0.0",
+    "primeicons": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@pinia/nuxt": "^0.11.3",
+    "@primevue/nuxt-module": "^4.5.4",
+    "@vueuse/nuxt": "^14.1.0",
+    "nuxt-auth-utils": "^0.5.27",
+    "sass-embedded": "^1.97.2"
+  }
+}
